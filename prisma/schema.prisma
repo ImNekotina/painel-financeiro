@@ -1,0 +1,100 @@
+// Prisma schema — Painel Financeiro
+// Banco de dados: PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  transactions Transaction[]
+  categories   Category[]
+  goals        Goal[]
+  sessions     Session[]
+
+  @@map("users")
+}
+
+/// Sessões de autenticação (server-side, revogáveis)
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  userAgent String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  color     String   @default("#6366f1")
+  icon      String?  @default("tag")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@unique([userId, name])
+  @@index([userId])
+  @@map("categories")
+}
+
+model Transaction {
+  id          String           @id @default(cuid())
+  userId      String
+  type        TransactionType
+  amountCents Int
+  description String
+  categoryId  String?
+  date        DateTime
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([userId, date])
+  @@index([userId, type])
+  @@index([categoryId])
+  @@map("transactions")
+}
+
+model Goal {
+  id                String   @id @default(cuid())
+  userId            String
+  title             String
+  targetAmountCents Int
+  currentAmountCents Int     @default(0)
+  deadline          DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("goals")
+}

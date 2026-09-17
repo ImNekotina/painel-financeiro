@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+/* Habilita alternância manual de tema via classe .dark no <html> (além do
+   suporte a prefers-color-scheme controlado pelo próprio script inline). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #f7f8fa;
+  --foreground: #0f172a;
+  --brand: #0f766e;
+  --brand-foreground: #ecfdf5;
+}
+
+.dark {
+  --background: #0b0f14;
+  --foreground: #e2e8f0;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-brand: var(--brand);
+  --font-sans: var(--font-inter);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+::selection {
+  background-color: rgba(16, 185, 129, 0.25);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-in-from-bottom-4 {
+  from { transform: translateY(1rem); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-in {
+  animation-duration: 200ms;
+  animation-fill-mode: both;
+}
+.fade-in { animation-name: fade-in; }
+.slide-in-from-bottom-4 { animation-name: slide-in-from-bottom-4; }
